@@ -69,13 +69,15 @@ def find_tau_for_tailing(xrange, mu, sigma, peak, tailing):
     curve = expo_gauss_curve(xrange, mu, sigma, peak, f.roots()[0])
     return f.roots()[0], find_asym(xrange, curve)-tailing, curve
 
+def avg(lst):
+    return sum(lst) / len(lst)
 
 def generate_curves(data):
     x_max = max([vals[1] for vals in data]) + 5
     data_points = ceil(x_max/XSTEP)+1
     xrange = [x*XSTEP for x in range(0, data_points)]
 
-    peak_curves = [["noise", 0, make_noise(xrange)]]
+    peak_curves = [["noise", 0, 0, make_noise(xrange)]]
 
     peak_heights = [vals[-2] for vals in data if vals[0]!="Main"]
     sum_heights = sum(peak_heights)
@@ -85,11 +87,14 @@ def generate_curves(data):
         if peak[0] == "Main":
             peak[-2] = main_peak_height
         lamb, tailing_error, curve = find_tau_for_tailing(xrange, peak[1], peak[3], peak[4], peak[5])
-        peak_curves.append([peak[0], tailing_error, curve])
+        peak_curves.append([peak[0], peak[5], tailing_error, curve])
 
-    sum_peak = [sum(item) for item in zip(*[curve for name, error, curve in peak_curves])]
-    peak_curves.append(["total", 0, sum_peak])
-
+    sum_peak = [sum(item) for item in zip(*[curve for name, tailing, error, curve in peak_curves])]
+    peak_curves.append(["total",
+                        avg([peak[1] for peak in peak_curves[1:]]),
+                        avg([peak[2] for peak in peak_curves[1:]]),
+                        sum_peak
+                        ])
     return xrange, max_height, peak_curves
 
 
@@ -110,14 +115,15 @@ def plot_and_save_curves(xrange, data, curves, max_height, filename):
 
 def save_simulated_data(xrange, data, curves, filename):
     with open(f'output/{filename}.txt', 'w') as file:
-        file.write(f"Peak label,{','.join([str(peak[0]) for peak in data])}\n")
+        file.write(f"Peak label,{','.join([str(peak[0]) for peak in curves])}\n")
         file.write(f"t (min), ,{','.join([str(peak[1]) for peak in data])}\n")
         file.write(f"w (min), ,{','.join([str(peak[2]) for peak in data])}\n")
         file.write(f"s (min), ,{','.join([str(peak[3]) for peak in data])}\n")
         file.write(f"response (%), ,{','.join([str(peak[4]) for peak in data])}\n")
-        file.write(f"tailing_factor, ,{','.join([str(peak[5]) for peak in data])}\n")
+        file.write(f"tailing_factor, ,{','.join([str(peak[1]) for peak in curves])}\n")
+        file.write(f"tailing_errors, ,{','.join([str(peak[2]) for peak in curves])}\n")
         for index, x in enumerate(xrange):
             row_str = [str(x)]
-        for peak in curves:
-            row_str.append(str(peak[-1][index]))
-        file.write(','.join(row_str)+'\n')
+            for peak in curves:
+                row_str.append(str(peak[-1][index]))
+            file.write(','.join(row_str)+'\n')
