@@ -38,11 +38,27 @@ From here if you can install the requirements to run the package using:\
 
 
 ## Using the package
+
+### Chromatography Simulation
 To simulate the chromatography results, update the `peak_parameters.csv` file (or change the filename in `settings.py`)
  to reflect the details of the experiment you wish to simulate.\
 It is important to note that the label names for the peaks do not matter, except their must be a "Main" peak as the peaks are normalised to this.
 Here, `t` represents the peak centre (with no tailing), `w` is the width, `s` is the standard deviation, `response` is the peak height and the `tailing factor` is the desired asymmetry calculated at 5% max height.
 
 To run the simulation simply use:\
-`python chromatography_simulator.py --filename <filename>`\
+`python chromatography_simulator.py --filename <filename>`
+
 where `<filename>` is the desired name of the simulated graph and raw data, which are saved to the output directory.
+Additionally, the `--parameters <path>` flag can be used to specify the location of the peak parameters .csv to simulate (if omitted, `peak_parameters.csv` is used).
+Note: data is plotted normalized to Main peak but data is saved in raw format (i.e. the integrated area of each peak corresponds to the response value).
+
+### Chromatography Fitter
+To fit a set of series of data (stored as a two column csv, default at `chromatography_data.csv`, with time and response pairs),
+update the `guess_parameters.csv` file with rough estimations for peak centres, standard deviations and responses (peak area).
+
+Then run:\
+`python chromatography_fitter.py --filename <filename>`
+
+where `<filename>` corresponds to the desired output of the data plotted with fit overlaid and simulated curves for
+individual peaks and the determined peak centres, standard deviations, responses and tailing factors.
+Additionally, `--guess_path <path>` and `--data_path <path>` can be used to specify the location of the guessed parameters and chromatography data to fit, respectively (if omitted `guess_parameters.csv` and `chromatography_data.csv` are used)
