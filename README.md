@@ -46,7 +46,7 @@ It is important to note that the label names for the peaks do not matter, except
 Here, `t` represents the peak centre (with no tailing), `w` is the width, `s` is the standard deviation, `response` is the peak height and the `tailing factor` is the desired asymmetry calculated at 5% max height.
 
 To run the simulation simply use:\
-`python chromatography_simulator.py --filename <filename>`
+`python chromatography_simulator.py --filename <filename> --parameters <path>`
 
 where `<filename>` is the desired name of the simulated graph and raw data, which are saved to the output directory.
 Additionally, the `--parameters <path>` flag can be used to specify the location of the peak parameters .csv to simulate (if omitted, `peak_parameters.csv` is used).
@@ -57,8 +57,20 @@ To fit a set of series of data (stored as a two column csv, default at `chromato
 update the `guess_parameters.csv` file with rough estimations for peak centres, standard deviations and responses (peak area).
 
 Then run:\
-`python chromatography_fitter.py --filename <filename>`
+`python chromatography_fitter.py --filename <filename> --guess_path <path> --data_path <path>`
 
 where `<filename>` corresponds to the desired output of the data plotted with fit overlaid and simulated curves for
 individual peaks and the determined peak centres, standard deviations, responses and tailing factors.
-Additionally, `--guess_path <path>` and `--data_path <path>` can be used to specify the location of the guessed parameters and chromatography data to fit, respectively (if omitted `guess_parameters.csv` and `chromatography_data.csv` are used)
+Additionally, `--guess_path <path>` and `--data_path <path>` can be used to specify the location of the guessed parameters and chromatography data to fit, respectively (if omitted `guess_parameters.csv` and `chromatography_data.csv` are used).
+
+
+### Tailing Factor Analysis
+To determine at which point the tailing factor has increased such that two adjacent peaks no longer possess a valley between them,
+we can simulate the two curves under increasing tailing and calculate the valley height. To do so, update the `resolution_parameters.csv`
+(or another filename specified by flag) with the two peaks centres, standard deviations and responses (peak area).
+
+Then run:\
+`python resolution_predictor.py --filename <filename> --parameters <path>`
+
+where `<filename>` corresponds to the desired output of the plotted valley heights vs tailing function, as well as the raw data for that graph and individual curves.
+Additionally, `--parameters <path>` can be used to specify the location of the peak parameters.

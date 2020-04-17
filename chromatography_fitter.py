@@ -15,7 +15,7 @@ if __name__ == "__main__":
     parser.add_argument('--guess_path', help='path to guesses')
     parser.add_argument('--data_path', help='path to data for fitting')
     args = parser.parse_args()
-    filename = args.filename if args.filename is not None else ''.join(random.choice(string.lowercase) for x in range(8))
+    filename = args.filename if args.filename is not None else ''.join(random.choice(string.ascii_lowercase) for x in range(8))
     guess_path = args.guess_path if args.guess_path is not None else GUESS_PATH
     data_path = args.data_path if args.data_path is not None else CHROMATOGRAPHY_PATH
 
