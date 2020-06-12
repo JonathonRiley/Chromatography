@@ -19,7 +19,8 @@ if __name__ == "__main__":
     guess_path = args.guess_path if args.guess_path is not None else GUESS_PATH
     data_path = args.data_path if args.data_path is not None else CHROMATOGRAPHY_PATH
 
-    guesses, bounds = process_guess_and_bounds(guess_path)
+    raw_guesses = load_fit_guess(guess_path)
+    guesses, bounds = process_guess_and_bounds(raw_guesses)
 
     data = load_chromatography_data(data_path)
     background = extract_background([val for index, val in enumerate(guesses) if index%4==0], data)

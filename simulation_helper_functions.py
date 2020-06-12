@@ -27,8 +27,8 @@ def make_noise(xpoints):
 
 
 def find_tau_for_tailing(xrange, mu, sigma, peak, tailing):
-    test_range = [-10+0.01*x for x in range(2001)]
-    val = 0.01
+    test_range = [-10+0.002*x for x in range(10001)]
+    valstep = 0.01
     vals_tried = []
     tailing_factors = []
     asym = 100
@@ -49,7 +49,35 @@ def find_tau_for_tailing(xrange, mu, sigma, peak, tailing):
     f = interpolate.UnivariateSpline(vals_tried, reduced_tails, s=0)
     curve = expo_gauss_curve(xrange, mu, sigma, peak, f.roots()[0])
     tailing_actual = find_asym(xrange, curve)
-    return f.roots()[0], tailing_actual, tailing_actual-tailing, curve
+    return f.roots()[0], tailing_actual, tailing_actual-tailing
+
+
+def find_tailing(xrange, mu, sigma, peak, tailings):
+    lambda_step = 0.01
+    lambda_to_try = [x*lambda_step for x in range(1, int(60/lambda_step)+1)]
+    asyms = []
+    for lamb in lambda_to_try:
+        try:
+            asyms.append(find_asym(xrange, expo_gauss_curve(xrange, mu, sigma, peak, lamb)))
+        except:
+            asyms.append(None)
+    calc_tailings = {}
+    for tailing in tailings:
+        try:
+            reduced_tails = np.array(asyms) - tailing
+            f = interpolate.UnivariateSpline(lambda_to_try, reduced_tails, s=0)
+            curve = expo_gauss_curve(xrange, mu, sigma, peak, f.roots()[0])
+            tailing_actual = find_asym(xrange, curve)
+            calc_tailings[tailing] = {'lambda':f.roots()[0], 'actual_asym':tailing_actual, 'error':round((tailing_actual-tailing)/tailing*100,2)}
+        except:
+            calc_tailings[tailing] = {'lambda':None, 'actual_asym':None, 'error':None}
+    return calc_tailings
+
+
+lambs_to_tailing2 = {}
+xvals = [-10+0.002*x for x in range(10001)]
+for sigma in [x/100 for x in range(1,101)]:
+    lambs_to_tailing2[sigma] = find_tailing(xvals, 0, sigma, 1, [1+x/100 for x in range(1,80)])
 
 
 def avg(lst):
